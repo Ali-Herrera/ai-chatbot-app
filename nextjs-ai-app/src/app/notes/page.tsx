@@ -1,3 +1,8 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AI App - Notes",
+};
 
 export default function NotesPage() {
   return (
