@@ -1,13 +1,33 @@
+import Note from "@/components/Note";
+import { auth } from "@clerk/nextjs";
 import { Metadata } from "next";
+import prisma from "@/lib/db/prisma";
 
 export const metadata: Metadata = {
   title: "AI App - Notes",
 };
 
-export default function NotesPage() {
+export default async function NotesPage() {
+  const { userId } = auth();
+
+  if (!userId) throw Error("userId undefined");
+
+  const allNotes = await prisma.note.findMany({
+    where: { userId },
+  });
+
   return (
-    <div>
-      <h1>Notes Page</h1>
+    <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+      {allNotes.map((note) => (
+        <Note note={note} key={note.id} />
+      ))}
+      {allNotes.length === 0 && (
+        <div className='col-span-full text-center'>
+          {
+            "You don't have any notes yet. Create one by clicking the Add Note button."
+          }
+        </div>
+      )}
     </div>
   );
 }
