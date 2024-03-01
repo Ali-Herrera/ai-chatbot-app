@@ -1,13 +1,13 @@
-import { CreateNoteSchema, createNoteSchema } from "@/lib/validation/note";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { CreateNoteSchema, createNoteSchema } from '@/lib/validation/note';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogHeader,
   DialogTitle,
   DialogContent,
   DialogFooter,
-} from "./ui/dialog";
+} from './ui/dialog';
 import {
   Form,
   FormField,
@@ -15,12 +15,14 @@ import {
   FormLabel,
   FormMessage,
   FormControl,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import LoadingButton from "./ui/loading-button";
-import { useRouter } from "next/navigation";
-import { Note } from "@prisma/client";
+} from './ui/form';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import LoadingButton from './ui/loading-button';
+import { useRouter } from 'next/navigation';
+import { Note } from '@prisma/client';
+import { useState } from 'react';
+import { set } from 'zod';
 
 interface AddEditNoteDialogProps {
   open: boolean;
@@ -33,38 +35,59 @@ export default function AddEditNoteDiaglog({
   setOpen,
   noteToEdit,
 }: AddEditNoteDialogProps) {
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
+
   const router = useRouter();
 
   const form = useForm<CreateNoteSchema>({
     resolver: zodResolver(createNoteSchema),
     defaultValues: {
-      title: noteToEdit?.title || "",
-      content: noteToEdit?.content || "",
+      title: noteToEdit?.title || '',
+      content: noteToEdit?.content || '',
     },
   });
 
   async function onSubmit(input: CreateNoteSchema) {
     try {
       if (noteToEdit) {
-        const response = await fetch("/api/notes", {
-          method: "PUT",
-          body: JSON.stringify({ ...input, id: noteToEdit.id }),
+        const response = await fetch('/api/notes', {
+          method: 'PUT',
+          body: JSON.stringify({ id: noteToEdit.id, ...input }),
         });
-        if (!response.ok) throw Error("Status code: " + response.status);
+        if (!response.ok) throw Error('Status code: ' + response.status);
       } else {
-        const response = await fetch("/api/notes", {
-          method: "POST",
+        const response = await fetch('/api/notes', {
+          method: 'POST',
           body: JSON.stringify(input),
         });
 
-        if (!response.ok) throw Error("Status code: " + response.status);
+        if (!response.ok) throw Error('Status code: ' + response.status);
         form.reset();
       }
       router.refresh();
       setOpen(false);
     } catch (error) {
       console.error(error);
-      alert("An error occurred. Please try again.");
+      alert('An error occurred. Please try again.');
+    }
+  }
+
+  async function deleteNote() {
+    if (!noteToEdit) return;
+    setDeleteInProgress(true);
+    try {
+      const response = await fetch('/api/notes', {
+        method: 'DELETE',
+        body: JSON.stringify({ id: noteToEdit.id }),
+      });
+      if (!response.ok) throw Error('Status code: ' + response.status);
+      router.refresh();
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setDeleteInProgress(false);
     }
   }
 
@@ -72,7 +95,7 @@ export default function AddEditNoteDiaglog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Note</DialogTitle>
+          <DialogTitle>{noteToEdit ? 'Edit Note' : 'Add Note'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-3'>
@@ -102,10 +125,22 @@ export default function AddEditNoteDiaglog({
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className='gap=1'>
+              {noteToEdit && (
+                <LoadingButton
+                  loading={deleteInProgress}
+                  onClick={deleteNote}
+                  variant='destructive'
+                  disabled={form.formState.isSubmitting}
+                  type='button'
+                >
+                  Delete
+                </LoadingButton>
+              )}
               <LoadingButton
                 type='submit'
                 loading={form.formState.isSubmitting}
+                disabled={deleteInProgress}
               >
                 Submit
               </LoadingButton>

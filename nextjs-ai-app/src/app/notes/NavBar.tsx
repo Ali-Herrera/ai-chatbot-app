@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import logo from "@/assets/logo.png";
-import { UserButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import AddEditNoteDiaglog from "@/components/AddEditNoteDialog";
+import Image from 'next/image';
+import Link from 'next/link';
+import logo from '@/assets/logo.png';
+import { UserButton } from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import AddEditNoteDiaglog from '@/components/AddEditNoteDialog';
+import AiChatButton from '@/components/AiChatButton';
 
 export default function NavBar() {
   const [showAddEditNoteDialog, setShowAddEditNoteDialog] = useState(false);
@@ -24,13 +25,14 @@ export default function NavBar() {
             <UserButton
               afterSignOutUrl='/'
               appearance={{
-                elements: { avatarBox: { width: "2.5rem", height: "2.5rem" } },
+                elements: { avatarBox: { width: '2.5rem', height: '2.5rem' } },
               }}
             />
             <Button onClick={() => setShowAddEditNoteDialog(true)}>
               <Plus size={20} className='mr-2' />
               Add Note
             </Button>
+            <AiChatButton />
           </div>
         </div>
       </div>

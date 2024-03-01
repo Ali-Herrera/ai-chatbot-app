@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Note as NoteModel } from "@prisma/client";
+import { Note as NoteModel } from '@prisma/client';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { useState } from "react";
-import AddEditNoteDiaglog from "./AddEditNoteDialog";
+} from './ui/card';
+import { useState } from 'react';
+import AddEditNoteDiaglog from './AddEditNoteDialog';
 
 interface NoteProps {
   note: NoteModel;
@@ -34,14 +34,18 @@ export default function Note({ note }: NoteProps) {
           <CardTitle>{note.title}</CardTitle>
           <CardDescription>
             {createdUpdatedAtTimeStamp}
-            {wasUpdated && " (updated)"}
+            {wasUpdated && ' (updated)'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className='whitespace-pre-line'>{note.content}</p>
         </CardContent>
       </Card>
-      <AddEditNoteDiaglog open={showEditDialog} setOpen={setShowEditDialog} />
+      <AddEditNoteDiaglog
+        open={showEditDialog}
+        setOpen={setShowEditDialog}
+        noteToEdit={note}
+      />
     </>
   );
 }
